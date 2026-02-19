@@ -96,6 +96,7 @@
 !scripts/stop_hook_inbox.sh
 !scripts/agent_status.sh
 !scripts/ratelimit_check.sh
+!scripts/gemini_cli.py
 
 
 # SayTask (sample template only, not actual data)
