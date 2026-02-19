@@ -69,6 +69,8 @@
 # Config (sample files only, no secrets)
 !config/
 !config/ntfy_auth.env.sample
+!config/models.yaml
+!config/settings.yaml
 
 # Templates
 !templates/
@@ -97,6 +99,7 @@
 !scripts/agent_status.sh
 !scripts/ratelimit_check.sh
 !scripts/gemini_cli.py
+!scripts/list_models.py
 
 
 # SayTask (sample template only, not actual data)

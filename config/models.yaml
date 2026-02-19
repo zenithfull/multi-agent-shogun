@@ -1,0 +1,24 @@
+default_provider: gemini
+
+providers:
+  gemini:
+    api_key_env: GEMINI_API_KEY
+  vertex_anthropic:
+    project_id_env: GOOGLE_CLOUD_PROJECT
+    location: us-central1
+  bedrock:
+    region_name: us-west-2
+
+roles:
+  shogun:
+    provider: bedrock
+    model: anthropic.claude-3-5-sonnet-20240620-v1:0
+  karo:
+    provider: gemini
+    model: gemini-2.0-flash
+  gunshi:
+    provider: gemini
+    model: gemini-2.0-flash
+  ashigaru:
+    provider: gemini
+    model: gemini-2.0-flash
