@@ -14,11 +14,11 @@ roles:
     provider: bedrock
     model: anthropic.claude-3-5-sonnet-20240620-v1:0
   karo:
-    provider: gemini
-    model: gemini-2.0-flash
+    provider: bedrock
+    model: anthropic.claude-3-5-sonnet-20240620-v1:0
   gunshi:
-    provider: gemini
-    model: gemini-2.0-flash
+    provider: bedrock
+    model: anthropic.claude-3-5-sonnet-20240620-v1:0
   ashigaru:
-    provider: gemini
-    model: gemini-2.0-flash
+    provider: bedrock
+    model: anthropic.claude-3-5-sonnet-20240620-v1:0
