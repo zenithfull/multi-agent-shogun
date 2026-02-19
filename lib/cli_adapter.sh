@@ -22,11 +22,22 @@ CLI_ADAPTER_ALLOWED_CLIS="claude codex copilot kimi gemini"
 
 # _cli_adapter_read_yaml key [fallback]
 # python3でsettings.yamlから値を読み取る
+# 失敗時はgrep/awkで簡易的に読み取るフォールバック機能付き
 _cli_adapter_read_yaml() {
     local key_path="$1"
     local fallback="${2:-}"
     local result
-    result=$("$CLI_ADAPTER_PROJECT_ROOT/.venv/bin/python3" -c "
+    local python_cmd="$CLI_ADAPTER_PROJECT_ROOT/.venv/bin/python3"
+    
+    # Pythonが実行可能かチェック
+    if [ ! -x "$python_cmd" ]; then
+        # Pythonがない場合は即座にフォールバック
+        _cli_adapter_read_yaml_fallback "$key_path" "$fallback"
+        return
+    fi
+
+    # Python実行（stderrは捨てるが、デバッグ時は表示できるようにしてもよい）
+    result=$("$python_cmd" -c "
 import yaml, sys
 try:
     with open('${CLI_ADAPTER_SETTINGS}') as f:
@@ -42,15 +53,45 @@ try:
     if val is not None:
         print(val)
     else:
-        print('${fallback}')
+        sys.exit(1) # 値なし
 except Exception:
-    print('${fallback}')
+    sys.exit(1) # エラー
 " 2>/dev/null)
-    if [[ -z "$result" ]]; then
-        echo "$fallback"
-    else
+
+    if [[ $? -eq 0 && -n "$result" ]]; then
         echo "$result"
+    else
+        # Python失敗時：フォールバック試行
+        _cli_adapter_read_yaml_fallback "$key_path" "$fallback"
     fi
+}
+
+# _cli_adapter_read_yaml_fallback key [fallback]
+# grep/awkを用いた簡易YAML読み取り（ネストの深い複雑な構造には非対応）
+_cli_adapter_read_yaml_fallback() {
+    local key_path="$1"
+    local fallback="${2:-}"
+    local key_name="${key_path##*.}" # 最後のキー名を取得（例: cli.default -> default）
+    
+    # 簡易的なgrep検索: "key: value" 形式を探す
+    # 行頭のスペースやコメントを考慮
+    local match
+    match=$(grep -E "^[[:space:]]*${key_name}:" "$CLI_ADAPTER_SETTINGS" 2>/dev/null | head -n 1)
+    
+    if [[ -n "$match" ]]; then
+        # "key: value" から value 部分を抽出 (コメント除去、前後の空白除去)
+        local value
+        value=$(echo "$match" | sed -E "s/^[[:space:]]*${key_name}:[[:space:]]*//; s/[[:space:]]*#.*//")
+        # 引用符の除去 ( "value" -> value )
+        value=$(echo "$value" | sed -E 's/^"//; s/"$//; s/^'"'"'//; s/'"'"'$//')
+        
+        if [[ -n "$value" ]]; then
+            echo "$value"
+            return
+        fi
+    fi
+    
+    echo "$fallback"
 }
 
 # _cli_adapter_is_valid_cli cli_type
@@ -109,6 +150,8 @@ except Exception as e:
 " 2>/dev/null)
 
     if [[ -z "$result" ]]; then
+        # Pythonも失敗し、フォールバックも失敗した場合
+        echo "[WARN] Failed to determine CLI type for '$agent_id'. Falling back to 'claude'. (Python/Grep failed)" >&2
         echo "claude"
     else
         if ! _cli_adapter_is_valid_cli "$result"; then
