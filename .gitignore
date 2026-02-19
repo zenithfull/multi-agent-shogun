@@ -19,6 +19,7 @@
 !README_ja.md
 !CONTRIBUTING.md
 !SECURITY.md
+!test_grep.sh
 
 # Claude Code settings (spinner verbs only, no secrets)
 !.claude/
