@@ -163,6 +163,7 @@
 !tests/e2e/mock_behaviors/*.sh
 !tests/test_helper/
 !tests/test_helper/README.md
+!tests/test_bedrock_integration.py
 
 # CI/CD
 !.github/
