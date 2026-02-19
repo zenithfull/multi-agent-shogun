@@ -289,6 +289,11 @@ def get_model_config(role, config):
     
     roles = config.get('roles', {})
     role_config = roles.get(role, {})
+    
+    # Fallback for ashigaru1, ashigaru2, etc. -> ashigaru
+    if not role_config and role.startswith('ashigaru'):
+        role_config = roles.get('ashigaru', {})
+
     provider = role_config.get('provider', 'gemini')
     model_name = role_config.get('model', 'gemini-2.0-flash')
     
